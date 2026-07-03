@@ -1,0 +1,5 @@
+# robots.txt — frontek reads (RSS reader)
+User-agent: *
+Allow: /
+
+Sitemap: https://feeds.frontek.dev/sitemap.xml

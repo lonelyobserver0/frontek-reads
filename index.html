@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>frontek reads — your private RSS reader</title>
+  <meta name="description" content="A minimal RSS/Atom reader. Search and subscribe to your favourite sites and read their latest articles in one feed. Everything is stored in your browser — no account, no server." />
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+  <link rel="apple-touch-icon" href="assets/og-image.svg" />
+  <meta name="theme-color" content="#264653" />
+
+  <!-- Open Graph / social preview -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="frontek reads" />
+  <meta property="og:title" content="frontek reads — your private RSS reader" />
+  <meta property="og:description" content="Search and subscribe to your favourite sites and read their latest articles in one feed. Stored in your browser — no account, no server." />
+  <meta property="og:url" content="https://feeds.frontek.dev/" />
+  <meta property="og:image" content="https://feeds.frontek.dev/assets/og-image.svg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="frontek reads — your private RSS reader" />
+  <meta name="twitter:description" content="Subscribe to your favourite sites and read them in one feed. Stored in your browser." />
+  <meta name="twitter:image" content="https://feeds.frontek.dev/assets/og-image.svg" />
+
+  <link rel="canonical" href="https://feeds.frontek.dev/" />
+  <link rel="stylesheet" href="css/style.css?v=3" />
+</head>
+<body>
+
+  <!-- ============ NAV ============ -->
+  <header class="nav" id="top">
+    <div class="container nav__inner">
+      <a class="nav__brand" href="#home">frontek <span>reads</span></a>
+      <nav class="nav__links" id="navLinks">
+        <a href="#home" data-view="home" class="is-active">Home</a>
+        <a href="#discover" data-view="discover">Discover</a>
+      </nav>
+      <div class="nav__actions">
+        <button class="iconbtn" id="btnRefresh" title="Refresh all feeds" aria-label="Refresh">⟳</button>
+        <button class="iconbtn" id="btnSettings" title="Settings" aria-label="Settings">⚙</button>
+        <button class="nav__toggle" id="navToggle" aria-label="Toggle menu">☰</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============ HOME VIEW ============ -->
+  <main id="view-home" class="view">
+    <section class="feedhead">
+      <div class="container">
+        <p class="section__kicker">Your feed</p>
+        <h1 class="feedhead__title">Latest from your subscriptions</h1>
+        <div class="feedhead__bar">
+          <span class="feedhead__count" id="feedCount">No subscriptions yet</span>
+          <div class="feedhead__filters" id="sourceFilters"><!-- source chips injected --></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="container feedbody">
+      <!-- Empty state -->
+      <div class="empty" id="emptyState">
+        <div class="empty__ico">📡</div>
+        <h2>Nothing here yet</h2>
+        <p>Subscribe to a few sites and their latest articles will show up right here — all kept privately in your browser.</p>
+        <a class="btn btn--primary" href="#discover" data-view="discover">Discover feeds</a>
+      </div>
+
+      <!-- Status / loading line -->
+      <p class="feedstatus" id="feedStatus" hidden></p>
+
+      <!-- Articles -->
+      <div class="articles" id="articles"><!-- article cards injected --></div>
+    </section>
+  </main>
+
+  <!-- ============ DISCOVER VIEW ============ -->
+  <main id="view-discover" class="view" hidden>
+    <section class="feedhead">
+      <div class="container">
+        <p class="section__kicker">Discover</p>
+        <h1 class="feedhead__title">Find sites to follow</h1>
+        <p class="lead">Search the catalog, or paste any site / feed URL to subscribe. New feeds are added straight to your home.</p>
+
+        <form class="search" id="searchForm" autocomplete="off">
+          <input class="search__input" id="searchInput" type="text"
+                 placeholder="Search e.g. “technology”, or paste https://example.com …"
+                 aria-label="Search feeds or paste a URL" />
+          <button class="btn btn--primary search__btn" type="submit">Search</button>
+        </form>
+        <div class="search__cats" id="searchCats"><!-- category chips --></div>
+      </div>
+    </section>
+
+    <section class="container">
+      <p class="feedstatus" id="discoverStatus" hidden></p>
+      <div class="cards" id="catalogResults"><!-- catalog cards injected --></div>
+    </section>
+
+    <!-- Subscriptions manager -->
+    <section class="section section--alt">
+      <div class="container">
+        <div class="subs__head">
+          <div>
+            <p class="section__kicker">Your subscriptions</p>
+            <h2 class="section__title">Manage feeds</h2>
+          </div>
+          <div class="subs__tools">
+            <button class="btn btn--ghost btn--dark" id="btnExport">Export OPML</button>
+            <button class="btn btn--ghost btn--dark" id="btnImport">Import</button>
+            <input type="file" id="importFile" accept=".opml,.xml,.json,application/xml,text/xml" hidden />
+          </div>
+        </div>
+        <div class="subs" id="subsList"><!-- subscription rows injected --></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============ SETTINGS DIALOG ============ -->
+  <div class="modal" id="settingsModal" hidden>
+    <div class="modal__backdrop" data-close></div>
+    <div class="modal__card" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+      <div class="modal__head">
+        <h2 id="settingsTitle">Settings</h2>
+        <button class="iconbtn" data-close aria-label="Close">✕</button>
+      </div>
+      <div class="modal__body">
+        <label class="field">
+          <span class="field__label">CORS proxy</span>
+          <span class="field__hint">
+            Browsers can't read most feeds directly, so requests go through a proxy.
+            Use <code>{url}</code> as the placeholder for the feed address. Your data never
+            leaves your browser except the feed URL being fetched.
+          </span>
+          <input class="field__input" id="proxyInput" type="text" spellcheck="false" />
+        </label>
+        <div class="field__row">
+          <button class="btn btn--ghost btn--dark" id="proxyDefault">Reset default</button>
+        </div>
+
+        <hr class="rule" />
+
+        <label class="field">
+          <span class="field__label">Cache</span>
+          <span class="field__hint">Articles are cached in your browser for speed. Clear it to force a fresh fetch.</span>
+        </label>
+        <div class="field__row">
+          <button class="btn btn--ghost btn--dark" id="btnClearCache">Clear article cache</button>
+          <button class="btn btn--danger" id="btnClearAll">Delete all my data</button>
+        </div>
+      </div>
+      <div class="modal__foot">
+        <button class="btn btn--primary" data-close>Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ READER DIALOG ============ -->
+  <div class="modal modal--reader" id="readerModal" hidden>
+    <div class="modal__backdrop" data-close></div>
+    <div class="modal__card reader" role="dialog" aria-modal="true" aria-labelledby="readerTitle">
+      <div class="reader__head">
+        <span class="reader__src" id="readerSource"></span>
+        <button class="iconbtn" data-close aria-label="Close reader">✕</button>
+      </div>
+      <div class="reader__scroll" id="readerScroll">
+        <article class="reader__inner">
+          <h1 class="reader__h1"><a id="readerTitle" href="#" target="_blank" rel="noopener"></a></h1>
+          <p class="reader__meta">
+            <span id="readerDate"></span>
+            <span class="reader__sep">·</span>
+            <a id="readerOriginal" href="#" target="_blank" rel="noopener">Apri originale ↗</a>
+          </p>
+          <div class="reader__actions">
+            <button class="btn btn--primary btn--sm" id="readerFull">Leggi articolo intero</button>
+          </div>
+          <div class="reader__note-slot" id="readerNote" hidden></div>
+          <div class="reader__body prose" id="readerBody"></div>
+        </article>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast" hidden></div>
+
+  <!-- ============ FOOTER ============ -->
+  <footer class="footer">
+    <div class="container footer__inner">
+      <div>
+        <strong>frontek reads</strong>
+        <p>A private, no-account RSS reader — part of <a href="https://frontek.dev">frontek.dev</a>.</p>
+      </div>
+      <div class="footer__meta">
+        <p>Your subscriptions live only in this browser. <a href="#discover" data-view="discover">Export them</a> to keep a backup.</p>
+        <p>© <span id="year"></span> Luca Mulazzi.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

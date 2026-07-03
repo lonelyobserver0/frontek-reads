@@ -1,0 +1,34 @@
+{
+  "updated": "2026-07-03",
+  "feeds": [
+    { "title": "Hacker News",            "site": "https://news.ycombinator.com",     "feed": "https://hnrss.org/frontpage",                         "category": "Tech" },
+    { "title": "The Verge",              "site": "https://www.theverge.com",          "feed": "https://www.theverge.com/rss/index.xml",              "category": "Tech" },
+    { "title": "Ars Technica",           "site": "https://arstechnica.com",           "feed": "https://feeds.arstechnica.com/arstechnica/index",     "category": "Tech" },
+    { "title": "Wired",                  "site": "https://www.wired.com",             "feed": "https://www.wired.com/feed/rss",                      "category": "Tech" },
+    { "title": "TechCrunch",             "site": "https://techcrunch.com",            "feed": "https://techcrunch.com/feed/",                        "category": "Tech" },
+    { "title": "Engadget",               "site": "https://www.engadget.com",          "feed": "https://www.engadget.com/rss.xml",                    "category": "Tech" },
+    { "title": "MIT Technology Review",  "site": "https://www.technologyreview.com",  "feed": "https://www.technologyreview.com/feed/",              "category": "Tech" },
+
+    { "title": "BBC News",               "site": "https://www.bbc.com/news",          "feed": "https://feeds.bbci.co.uk/news/rss.xml",               "category": "News" },
+    { "title": "Reuters World",          "site": "https://www.reuters.com",           "feed": "https://www.reutersagency.com/feed/?best-topics=world&post_type=best", "category": "News" },
+    { "title": "NPR News",               "site": "https://www.npr.org",               "feed": "https://feeds.npr.org/1001/rss.xml",                  "category": "News" },
+    { "title": "The Guardian",           "site": "https://www.theguardian.com",       "feed": "https://www.theguardian.com/international/rss",        "category": "News" },
+
+    { "title": "GitHub Blog",            "site": "https://github.blog",               "feed": "https://github.blog/feed/",                           "category": "Dev" },
+    { "title": "Stack Overflow Blog",    "site": "https://stackoverflow.blog",        "feed": "https://stackoverflow.blog/feed/",                    "category": "Dev" },
+    { "title": "dev.to",                 "site": "https://dev.to",                    "feed": "https://dev.to/feed",                                 "category": "Dev" },
+    { "title": "freeCodeCamp",           "site": "https://www.freecodecamp.org/news", "feed": "https://www.freecodecamp.org/news/rss/",              "category": "Dev" },
+    { "title": "CSS-Tricks",             "site": "https://css-tricks.com",            "feed": "https://css-tricks.com/feed/",                        "category": "Dev" },
+    { "title": "Smashing Magazine",      "site": "https://www.smashingmagazine.com",  "feed": "https://www.smashingmagazine.com/feed/",              "category": "Dev" },
+    { "title": "Python Insider",         "site": "https://blog.python.org",           "feed": "https://blog.python.org/feeds/posts/default",         "category": "Dev" },
+    { "title": "Krebs on Security",      "site": "https://krebsonsecurity.com",       "feed": "https://krebsonsecurity.com/feed/",                   "category": "Dev" },
+
+    { "title": "Nature",                 "site": "https://www.nature.com",            "feed": "https://www.nature.com/nature.rss",                   "category": "Science" },
+    { "title": "Scientific American",    "site": "https://www.scientificamerican.com","feed": "https://www.scientificamerican.com/platform/syndication/rss/", "category": "Science" },
+    { "title": "NASA Breaking News",     "site": "https://www.nasa.gov",              "feed": "https://www.nasa.gov/feed/",                          "category": "Science" },
+    { "title": "Quanta Magazine",        "site": "https://www.quantamagazine.org",    "feed": "https://www.quantamagazine.org/feed/",                "category": "Science" },
+
+    { "title": "xkcd",                   "site": "https://xkcd.com",                  "feed": "https://xkcd.com/rss.xml",                            "category": "Fun" },
+    { "title": "r/programming",          "site": "https://www.reddit.com/r/programming", "feed": "https://www.reddit.com/r/programming/.rss",        "category": "Fun" }
+  ]
+}
