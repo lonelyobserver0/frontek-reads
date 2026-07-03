@@ -1,107 +1,114 @@
-# frontek reads — client-side RSS/Atom reader
+# frontek reads
 
-`feeds.frontek.dev` — un lettore di feed RSS/Atom **completamente statico**.
-L'utente cerca i siti che preferisce, si "iscrive", e nella home vede gli ultimi
-articoli aggregati. **Nessun backend, nessun account, zero storage lato server**:
-iscrizioni, impostazioni e una piccola cache degli articoli vivono nel
-`localStorage` del browser dell'utente.
+A minimal, **client‑side RSS/Atom reader**. Search and subscribe to the sites you
+like, and read their latest articles in one aggregated feed — right inside the app.
 
-## Come funziona (senza server)
+**No accounts. No server storage. No tracking.** Your subscriptions, a small article
+cache and your settings all live in your browser's `localStorage`. Nothing about you
+is stored anywhere else.
 
-- **Iscrizioni** → `localStorage` (`frss.subs`). Sono dati dell'utente: si possono
-  esportare/importare in **OPML** o **JSON** per backup e portabilità.
-- **Cache articoli** → `localStorage` (`frss.cache`), max 20 articoli per feed,
-  TTL 15 min. Serve solo a velocizzare; si può svuotare dalle impostazioni.
-- **Lettura dei feed** → il browser non può leggere i feed di altri domini per via
-  della **CORS**. Le richieste passano quindi per un **proxy stateless** che gira
-  sullo stesso server (Node, dietro nginx): riceve solo l'URL del feed, lo scarica
-  e lo restituisce con gli header CORS. **Non salva nulla** — è puro forwarding.
+It's a static site: plain HTML, CSS and vanilla JavaScript — no build step, no
+framework, no runtime dependencies.
 
-  Proxy di default: `/proxy?url={url}` (same-origin, il nostro servizio Node).
-  Fallback automatici se il servizio è giù: `api.allorigins.win`, `api.codetabs.com`.
+## Features
 
-  Il proxy è configurabile nelle impostazioni con placeholder `{url}`.
+- **Discover** — search a curated catalog of well‑known feeds by name, category or
+  site, **or paste any site / feed URL**. If you paste a page instead of a feed, the
+  app auto‑discovers the feed (`<link rel="alternate">`, then common paths like
+  `/feed`, `/rss`, `/atom.xml`, …).
+- **Aggregated home** — the latest articles from every subscription, newest first,
+  with a per‑source filter.
+- **In‑site reader (hybrid)** — click an article to read it *inside the app* instead
+  of leaving. It shows the feed's content immediately; if the feed only ships an
+  excerpt, it tries to fetch and extract the **full article** (readability‑style)
+  from the original page. `Ctrl/Cmd+click` a title still opens the original in a new
+  tab, and there's always an "open original" link.
+- **Clean content** — boilerplate is stripped: "continue reading" links, related /
+  share boxes, newsletter widgets and affiliate/tracking links.
+- **XSS‑safe** — all feed and page HTML is run through an allow‑list sanitizer before
+  display (no `script`, `iframe`, `on*` handlers or `javascript:` URLs).
+- **Own your data** — export / import your subscriptions as **OPML** or **JSON** for
+  backup and portability.
 
-### Il proxy CORS (`proxy/`)
+## How it works
 
-`proxy/server.js` è un mini-server Node (~90 righe, nessuna dipendenza) che espone
-`GET /proxy?url=<feed>`. Caratteristiche:
+Everything runs in the browser. Data is kept under three `localStorage` keys:
 
-- **Stateless**: nessuno storage, nessun log dei contenuti.
-- **Guard SSRF**: accetta solo `http(s)`, blocca `localhost`/IP privati/`169.254.x`
-  (metadata cloud), cap 5 MB per risposta, timeout 15 s.
-- Gira in ascolto su `127.0.0.1:8787`; nginx lo espone su `…/proxy`.
-- Girato come servizio **systemd** (`proxy/frontek-reads-proxy.service`) con
-  `DynamicUser=yes` e sandboxing (`ProtectSystem=strict`, `NoNewPrivileges`, ecc.).
+| Key             | Contents                                                   |
+| --------------- | ---------------------------------------------------------- |
+| `frss.subs`     | your subscriptions `[{ title, feed, site }]`               |
+| `frss.settings` | your settings (currently the CORS proxy template)          |
+| `frss.cache`    | a small article cache (≤ 20 items/feed, 15‑min TTL)        |
 
-Perché self-hosted invece dei proxy pubblici gratuiti? Perché quelli sono
-inaffidabili: durante lo sviluppo allorigins andava in timeout e corsproxy.io ha
-iniziato a bloccare l'uso gratuito. Il proxy interno è affidabile, privato e —
-essendo solo forwarding — **non consuma spazio di archiviazione**.
+### The CORS proxy
 
-## Struttura
+Browsers can't `fetch` most third‑party feeds directly — the sites don't send CORS
+headers. So feed requests go through a **CORS proxy**: a service that fetches the feed
+URL and re‑serves it with permissive CORS headers. The proxy only ever sees the feed
+URL being requested.
+
+The proxy is configurable in **Settings**, using `{url}` as the placeholder for the
+(encoded) feed address. Out of the box the app is set up for a **same‑origin proxy**
+at `/proxy?url={url}` and automatically falls back to public proxies if that isn't
+present:
 
 ```
-feeds.frontek.dev/
-├── index.html            # UI: Home (feed aggregato) + Discover (ricerca/iscrizioni)
-├── css/style.css         # stile brand, responsive
-├── js/app.js             # tutta la logica (storage, fetch, parsing, ricerca, OPML)
+Default : /proxy?url={url}                      (a proxy you host next to the app)
+Fallback: https://api.allorigins.win/raw?url={url}
+Fallback: https://api.codetabs.com/v1/proxy/?quest={url}
+```
+
+You have two options:
+
+- **Just use a public proxy** — open Settings and set the proxy to a public one such as
+  `https://api.allorigins.win/raw?url={url}`. Zero infrastructure, but public proxies
+  can be slow or intermittently unavailable.
+- **Host your own** (recommended for reliability & privacy) — run any tiny stateless
+  service that accepts `GET /proxy?url=<encoded>` and streams the target back with an
+  `Access-Control-Allow-Origin: *` header, then point Settings at it. A ~90‑line
+  Node/Deno/Worker script is enough; keep it behind the same origin as the app so no
+  external service is involved at all.
+
+> Note: some sites (paywalls, anti‑bot protection) return `403` to any server‑side
+> fetch. For those the reader shows the cleaned feed excerpt plus an "open original"
+> link — full extraction isn't possible without a real browser.
+
+## Project layout
+
+```
+.
+├── index.html            # the whole UI (Home + Discover + reader + settings)
+├── css/style.css         # styles, responsive, self‑contained
+├── js/app.js             # all logic: storage, fetch, parse, sanitize, reader, OPML
 ├── robots.txt
 ├── sitemap.xml
 └── assets/
     ├── favicon.svg
-    ├── og-image.svg      # anteprima social 1200x630
-    └── catalog.json      # catalogo curato di feed ricercabili
+    ├── og-image.svg      # social preview (1200×630)
+    └── catalog.json      # the curated, searchable feed directory
 ```
 
-## Funzioni
+## Run it locally
 
-- **Discover**: ricerca sul catalogo curato (`assets/catalog.json`) per nome/
-  categoria/sito, oppure **incolla un URL qualsiasi**: l'app riconosce se è già un
-  feed, altrimenti fa auto-discovery (`<link rel="alternate">` nella pagina, poi
-  prova i percorsi comuni `/feed`, `/rss`, `/atom.xml`, …).
-- **Home**: articoli di tutte le iscrizioni, ordinati per data, con filtro per fonte.
-- **Reader interno (ibrido)**: cliccando un articolo si apre un pannello lettura
-  *dentro il sito* (non si esce verso l'esterno). Mostra subito il contenuto del
-  feed; il pulsante **«Leggi articolo intero»** scarica la pagina originale via il
-  proxy ed estrae il testo leggibile (readability-lite). `Ctrl/Cmd+click` sul
-  titolo apre comunque l'originale in una nuova scheda, e c'è sempre il link
-  «Apri originale ↗». Il contenuto (feed o pagina) viene **sanificato** con una
-  allowlist prima di essere mostrato → niente `script`, `iframe`, `on*`,
-  `javascript:` (protezione XSS, testata).
-- **Sicurezza**: i contenuti dei feed (non fidati) vengono inseriti con
-  `textContent`/DOM, mai come `innerHTML` → niente XSS dai feed.
-- **Privacy**: nessun account, nessun tracciamento; i dati restano nel browser.
-
-## Aggiornare il catalogo
-
-Aggiungi voci a `assets/catalog.json`:
-```json
-{ "title": "Nome", "site": "https://sito", "feed": "https://sito/feed", "category": "Tech" }
-```
-
-## Deploy
-
-Statico. Script pronto (`~/deploy_feeds.sh`, modellato su `deploy_about-me.sh`):
-```bash
-sudo bash ~/deploy_feeds.sh
-```
-Crea la web root `/var/www/feeds.frontek.dev`, scrive il vhost nginx, ricarica e
-richiede il certificato TLS. Assicurati che il DNS di `feeds.frontek.dev` punti al
-server prima di lanciare certbot.
-
-## Provarlo in locale
+It's fully static, but it must be served over HTTP (not opened as a `file://`), because
+the catalog is loaded via `fetch`:
 
 ```bash
-cd feeds.frontek.dev
 python3 -m http.server 8080
-# apri http://localhost:8080
+# then open http://localhost:8080
 ```
-(Serve un server HTTP vero — non aprire come `file://` — perché il catalogo viene
-caricato via `fetch`.)
 
-## Note
+Locally there is no same‑origin `/proxy`, so feed fetching uses the public fallback
+proxies automatically.
 
-- Cambio dominio in un colpo solo:
-  `sed -i 's#https://feeds\.frontek\.dev#https://NUOVO#g' index.html robots.txt sitemap.xml`
-- OG image in SVG: vedi nota nel README della home per esportarla in PNG.
+## Customize
+
+- **Add feeds to the catalog** — edit `assets/catalog.json`:
+  ```json
+  { "title": "Example", "site": "https://example.com", "feed": "https://example.com/feed", "category": "Tech" }
+  ```
+- **Colors** — tweak the CSS custom properties in the `:root` block of `css/style.css`.
+
+## License
+
+No license yet — all rights reserved. If you'd like to reuse this, please get in touch.
