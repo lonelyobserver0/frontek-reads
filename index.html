@@ -26,22 +26,25 @@
   <meta name="twitter:image" content="https://feeds.frontek.dev/assets/og-image.svg" />
 
   <link rel="canonical" href="https://feeds.frontek.dev/" />
-  <link rel="stylesheet" href="css/style.css?v=3" />
+  <link rel="stylesheet" href="css/style.css?v=4" />
 </head>
 <body>
 
   <!-- ============ NAV ============ -->
   <header class="nav" id="top">
     <div class="container nav__inner">
-      <a class="nav__brand" href="#home">frontek <span>reads</span></a>
+      <a class="nav__brand" href="#home">FRONTEK <span>READS</span></a>
       <nav class="nav__links" id="navLinks">
-        <a href="#home" data-view="home" class="is-active">Home</a>
-        <a href="#discover" data-view="discover">Discover</a>
+        <a href="#home"       data-view="home"      data-i18n="nav_home" class="is-active">Home</a>
+        <a href="#favorites"  data-view="favorites" data-i18n="nav_favorites">Favorites</a>
+        <a href="#readlater"  data-view="readlater" data-i18n="nav_read_later">Read later</a>
+        <a href="#discover"   data-view="discover"  data-i18n="nav_discover">Discover</a>
       </nav>
       <div class="nav__actions">
-        <button class="iconbtn" id="btnRefresh" title="Refresh all feeds" aria-label="Refresh">⟳</button>
-        <button class="iconbtn" id="btnSettings" title="Settings" aria-label="Settings">⚙</button>
-        <button class="nav__toggle" id="navToggle" aria-label="Toggle menu">☰</button>
+        <button class="iconbtn" id="btnSubs"     data-i18n-title="discover_your_subs" title="Your subscriptions" aria-label="Your subscriptions">≣</button>
+        <button class="iconbtn" id="btnRefresh"  data-i18n-title="action_refresh"     title="Refresh" aria-label="Refresh">⟳</button>
+        <button class="iconbtn" id="btnSettings" data-i18n-title="action_settings"    title="Settings" aria-label="Settings">⚙</button>
+        <button class="nav__toggle" id="navToggle" aria-label="Menu">☰</button>
       </div>
     </div>
   </header>
@@ -50,29 +53,58 @@
   <main id="view-home" class="view">
     <section class="feedhead">
       <div class="container">
-        <p class="section__kicker">Your feed</p>
-        <h1 class="feedhead__title">Latest from your subscriptions</h1>
+        <p class="section__kicker" data-i18n="home_kicker">Your feed</p>
+        <h1 class="feedhead__title" data-i18n="home_title">Latest from your subscriptions</h1>
         <div class="feedhead__bar">
-          <span class="feedhead__count" id="feedCount">No subscriptions yet</span>
-          <div class="feedhead__filters" id="sourceFilters"><!-- source chips injected --></div>
+          <span class="feedhead__count" id="feedCount">—</span>
+          <div class="feedhead__filters" id="sourceFilters"></div>
         </div>
       </div>
     </section>
 
     <section class="container feedbody">
-      <!-- Empty state -->
       <div class="empty" id="emptyState">
         <div class="empty__ico">📡</div>
-        <h2>Nothing here yet</h2>
-        <p>Subscribe to a few sites and their latest articles will show up right here — all kept privately in your browser.</p>
-        <a class="btn btn--primary" href="#discover" data-view="discover">Discover feeds</a>
+        <h2 data-i18n="home_empty_title">No subscriptions</h2>
+        <p data-i18n="home_empty_body">Subscribe to a few sites and their latest articles will show up here — kept privately in your browser.</p>
+        <a class="btn btn--primary" href="#discover" data-view="discover" data-i18n="nav_discover">Discover</a>
       </div>
-
-      <!-- Status / loading line -->
       <p class="feedstatus" id="feedStatus" hidden></p>
+      <div class="articles" id="articles"></div>
+    </section>
+  </main>
 
-      <!-- Articles -->
-      <div class="articles" id="articles"><!-- article cards injected --></div>
+  <!-- ============ FAVORITES VIEW ============ -->
+  <main id="view-favorites" class="view" hidden>
+    <section class="feedhead">
+      <div class="container">
+        <p class="section__kicker" data-i18n="nav_favorites">Favorites</p>
+        <h1 class="feedhead__title" data-i18n="saved_favorites_title">Favorites</h1>
+      </div>
+    </section>
+    <section class="container feedbody">
+      <div class="empty" id="favEmpty">
+        <div class="empty__ico">♥</div>
+        <p data-i18n="saved_favorites_empty">Articles you mark as favorite will appear here.</p>
+      </div>
+      <div class="articles" id="favArticles"></div>
+    </section>
+  </main>
+
+  <!-- ============ READ LATER VIEW ============ -->
+  <main id="view-readlater" class="view" hidden>
+    <section class="feedhead">
+      <div class="container">
+        <p class="section__kicker" data-i18n="nav_read_later">Read later</p>
+        <h1 class="feedhead__title" data-i18n="saved_read_later_title">Read later</h1>
+      </div>
+    </section>
+    <section class="container feedbody">
+      <div class="empty" id="readLaterEmpty">
+        <div class="empty__ico">🔖</div>
+        <p data-i18n="saved_read_later_empty">Articles you save to read later will appear here.</p>
+      </div>
+      <div class="articles" id="readLaterArticles"></div>
     </section>
   </main>
 
@@ -80,41 +112,46 @@
   <main id="view-discover" class="view" hidden>
     <section class="feedhead">
       <div class="container">
-        <p class="section__kicker">Discover</p>
-        <h1 class="feedhead__title">Find sites to follow</h1>
-        <p class="lead">Search the catalog, or paste any site / feed URL to subscribe. New feeds are added straight to your home.</p>
+        <p class="section__kicker" data-i18n="nav_discover">Discover</p>
+        <h1 class="feedhead__title" data-i18n="discover_title">Find sites to follow</h1>
+        <p class="lead" data-i18n="discover_lead">Search the web for feeds, or paste any site / feed URL to subscribe.</p>
 
         <form class="search" id="searchForm" autocomplete="off">
           <input class="search__input" id="searchInput" type="text"
-                 placeholder="Search e.g. “technology”, or paste https://example.com …"
+                 data-i18n-ph="discover_search_placeholder"
+                 placeholder="Search feeds, or paste a URL…"
                  aria-label="Search feeds or paste a URL" />
-          <button class="btn btn--primary search__btn" type="submit">Search</button>
+          <button class="btn btn--primary search__btn" type="submit" data-i18n="discover_search_btn">Search</button>
         </form>
-        <div class="search__cats" id="searchCats"><!-- category chips --></div>
+        <p class="search__note" id="searchPrivacy" data-i18n="discover_privacy_note">Search queries are sent to Feedly to find feeds. Nothing else leaves your browser.</p>
+        <div class="search__cats" id="searchCats"></div>
       </div>
     </section>
 
     <section class="container">
       <p class="feedstatus" id="discoverStatus" hidden></p>
-      <div class="cards" id="catalogResults"><!-- catalog cards injected --></div>
+      <div class="cards" id="catalogResults"></div>
     </section>
+  </main>
 
-    <!-- Subscriptions manager -->
-    <section class="section section--alt">
+  <!-- ============ SUBSCRIPTIONS VIEW ============ -->
+  <main id="view-subs" class="view" hidden>
+    <section class="feedhead">
       <div class="container">
-        <div class="subs__head">
-          <div>
-            <p class="section__kicker">Your subscriptions</p>
-            <h2 class="section__title">Manage feeds</h2>
-          </div>
+        <p class="section__kicker" data-i18n="discover_your_subs">Your subscriptions</p>
+        <h1 class="feedhead__title" data-i18n="subs_manage_title">Manage feeds</h1>
+        <div class="feedhead__bar">
+          <span class="feedhead__count" id="subsCount">—</span>
           <div class="subs__tools">
-            <button class="btn btn--ghost btn--dark" id="btnExport">Export OPML</button>
-            <button class="btn btn--ghost btn--dark" id="btnImport">Import</button>
+            <button class="btn btn--ghost btn--light" id="btnExport" data-i18n="action_export">Export</button>
+            <button class="btn btn--ghost btn--light" id="btnImport" data-i18n="action_import">Import</button>
             <input type="file" id="importFile" accept=".opml,.xml,.json,application/xml,text/xml" hidden />
           </div>
         </div>
-        <div class="subs" id="subsList"><!-- subscription rows injected --></div>
       </div>
+    </section>
+    <section class="container feedbody">
+      <div class="subs" id="subsList"></div>
     </section>
   </main>
 
@@ -123,36 +160,60 @@
     <div class="modal__backdrop" data-close></div>
     <div class="modal__card" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
       <div class="modal__head">
-        <h2 id="settingsTitle">Settings</h2>
-        <button class="iconbtn" data-close aria-label="Close">✕</button>
+        <h2 id="settingsTitle" data-i18n="settings_title">Settings</h2>
+        <button class="iconbtn" data-close data-i18n-title="action_close" aria-label="Close">✕</button>
       </div>
       <div class="modal__body">
+        <!-- Language -->
         <label class="field">
-          <span class="field__label">CORS proxy</span>
-          <span class="field__hint">
-            Browsers can't read most feeds directly, so requests go through a proxy.
-            Use <code>{url}</code> as the placeholder for the feed address. Your data never
-            leaves your browser except the feed URL being fetched.
-          </span>
-          <input class="field__input" id="proxyInput" type="text" spellcheck="false" />
+          <span class="field__label" data-i18n="settings_language">Language</span>
+          <select class="field__select" id="langSelect">
+            <option value="system"  data-i18n="lang_system">System default</option>
+            <option value="it"      data-i18n="lang_italian">Italiano</option>
+            <option value="en"      data-i18n="lang_english">English</option>
+            <option value="es"      data-i18n="lang_spanish">Español</option>
+            <option value="fr"      data-i18n="lang_french">Français</option>
+          </select>
         </label>
-        <div class="field__row">
-          <button class="btn btn--ghost btn--dark" id="proxyDefault">Reset default</button>
+
+        <hr class="rule" />
+
+        <!-- Text size -->
+        <label class="field">
+          <span class="field__label" data-i18n="settings_text_size">Text size</span>
+        </label>
+        <div class="fontctrl">
+          <button class="iconbtn" id="fontMinus" data-i18n-title="font_decrease" aria-label="Decrease text size">−</button>
+          <span class="fontctrl__val" id="fontVal">100%</span>
+          <button class="iconbtn" id="fontPlus" data-i18n-title="font_increase" aria-label="Increase text size">+</button>
+          <button class="btn btn--ghost btn--dark btn--sm" id="fontReset" data-i18n="font_reset">Reset</button>
         </div>
 
         <hr class="rule" />
 
+        <!-- Proxy (web only) -->
         <label class="field">
-          <span class="field__label">Cache</span>
-          <span class="field__hint">Articles are cached in your browser for speed. Clear it to force a fresh fetch.</span>
+          <span class="field__label" data-i18n="settings_proxy_label">CORS proxy</span>
+          <span class="field__hint" data-i18n="settings_proxy_hint">
+            Browsers can't read most feeds directly, so requests go through a proxy.
+            Use {url} as the placeholder for the feed address.
+          </span>
+          <input class="field__input" id="proxyInput" type="text" spellcheck="false" />
         </label>
         <div class="field__row">
-          <button class="btn btn--ghost btn--dark" id="btnClearCache">Clear article cache</button>
-          <button class="btn btn--danger" id="btnClearAll">Delete all my data</button>
+          <button class="btn btn--ghost btn--dark" id="proxyDefault" data-i18n="settings_proxy_reset">Reset default</button>
+        </div>
+
+        <hr class="rule" />
+
+        <!-- Data -->
+        <div class="field__row">
+          <button class="btn btn--ghost btn--dark" id="btnClearCache" data-i18n="settings_clear_cache">Clear article cache</button>
+          <button class="btn btn--danger" id="btnClearAll" data-i18n="settings_delete_all">Delete all my data</button>
         </div>
       </div>
       <div class="modal__foot">
-        <button class="btn btn--primary" data-close>Done</button>
+        <button class="btn btn--primary" data-close data-i18n="action_close">Close</button>
       </div>
     </div>
   </div>
@@ -163,7 +224,11 @@
     <div class="modal__card reader" role="dialog" aria-modal="true" aria-labelledby="readerTitle">
       <div class="reader__head">
         <span class="reader__src" id="readerSource"></span>
-        <button class="iconbtn" data-close aria-label="Close reader">✕</button>
+        <div class="reader__headtools">
+          <button class="toggle toggle--fav" id="readerFav" type="button" aria-pressed="false">♡</button>
+          <button class="toggle toggle--rl"  id="readerRl"  type="button" aria-pressed="false">🔖</button>
+          <button class="iconbtn" data-close data-i18n-title="reader_close" aria-label="Close reader">✕</button>
+        </div>
       </div>
       <div class="reader__scroll" id="readerScroll">
         <article class="reader__inner">
@@ -171,10 +236,10 @@
           <p class="reader__meta">
             <span id="readerDate"></span>
             <span class="reader__sep">·</span>
-            <a id="readerOriginal" href="#" target="_blank" rel="noopener">Apri originale ↗</a>
+            <a id="readerOriginal" href="#" target="_blank" rel="noopener" data-i18n="reader_open_original">Open original ↗</a>
           </p>
           <div class="reader__actions">
-            <button class="btn btn--primary btn--sm" id="readerFull">Leggi articolo intero</button>
+            <button class="btn btn--primary btn--sm" id="readerFull" data-i18n="reader_read_full">Read full article</button>
           </div>
           <div class="reader__note-slot" id="readerNote" hidden></div>
           <div class="reader__body prose" id="readerBody"></div>
@@ -191,10 +256,10 @@
     <div class="container footer__inner">
       <div>
         <strong>frontek reads</strong>
-        <p>A private, no-account RSS reader — part of <a href="https://frontek.dev">frontek.dev</a>.</p>
+        <p data-i18n-html="footer_tagline">A private, no-account RSS reader — part of <a href="https://frontek.dev">frontek.dev</a>.</p>
       </div>
       <div class="footer__meta">
-        <p>Your subscriptions live only in this browser. <a href="#discover" data-view="discover">Export them</a> to keep a backup.</p>
+        <p data-i18n="footer_backup">Your subscriptions live only in this browser. Export them to keep a backup.</p>
         <p>© <span id="year"></span> Luca Mulazzi.</p>
       </div>
     </div>

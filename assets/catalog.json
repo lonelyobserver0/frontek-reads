@@ -8,11 +8,29 @@
     { "title": "TechCrunch",             "site": "https://techcrunch.com",            "feed": "https://techcrunch.com/feed/",                        "category": "Tech" },
     { "title": "Engadget",               "site": "https://www.engadget.com",          "feed": "https://www.engadget.com/rss.xml",                    "category": "Tech" },
     { "title": "MIT Technology Review",  "site": "https://www.technologyreview.com",  "feed": "https://www.technologyreview.com/feed/",              "category": "Tech" },
+    { "title": "Android Authority",      "site": "https://www.androidauthority.com",  "feed": "https://www.androidauthority.com/feed/",              "category": "Tech" },
+    { "title": "9to5Google",             "site": "https://9to5google.com",            "feed": "https://9to5google.com/feed/",                        "category": "Tech" },
+    { "title": "9to5Mac",                "site": "https://9to5mac.com",               "feed": "https://9to5mac.com/feed/",                           "category": "Tech" },
+    { "title": "MacRumors",              "site": "https://www.macrumors.com",         "feed": "https://feeds.macrumors.com/MacRumors-All",           "category": "Tech" },
+
+    { "title": "HDblog",                 "site": "https://www.hdblog.it",             "feed": "https://www.hdblog.it/feed/",                         "category": "Tech IT" },
+    { "title": "DDAY.it",                "site": "https://www.dday.it",               "feed": "https://www.dday.it/rss",                             "category": "Tech IT" },
+    { "title": "Tom's Hardware Italia",  "site": "https://www.tomshw.it",             "feed": "https://www.tomshw.it/feed",                          "category": "Tech IT" },
+    { "title": "Wired Italia",           "site": "https://www.wired.it",              "feed": "https://www.wired.it/feed/rss",                       "category": "Tech IT" },
+    { "title": "SmartWorld",             "site": "https://www.smartworld.it",         "feed": "https://www.smartworld.it/feed/",                     "category": "Tech IT" },
+    { "title": "Punto Informatico",      "site": "https://www.punto-informatico.it",  "feed": "https://www.punto-informatico.it/feed/",              "category": "Tech IT" },
+    { "title": "Macitynet",              "site": "https://www.macitynet.it",          "feed": "https://www.macitynet.it/feed/",                      "category": "Tech IT" },
+    { "title": "IlSoftware",             "site": "https://www.ilsoftware.it",         "feed": "https://www.ilsoftware.it/feed/",                     "category": "Tech IT" },
 
     { "title": "BBC News",               "site": "https://www.bbc.com/news",          "feed": "https://feeds.bbci.co.uk/news/rss.xml",               "category": "News" },
-    { "title": "Reuters World",          "site": "https://www.reuters.com",           "feed": "https://www.reutersagency.com/feed/?best-topics=world&post_type=best", "category": "News" },
     { "title": "NPR News",               "site": "https://www.npr.org",               "feed": "https://feeds.npr.org/1001/rss.xml",                  "category": "News" },
     { "title": "The Guardian",           "site": "https://www.theguardian.com",       "feed": "https://www.theguardian.com/international/rss",        "category": "News" },
+    { "title": "Al Jazeera",             "site": "https://www.aljazeera.com",         "feed": "https://www.aljazeera.com/xml/rss/all.xml",           "category": "News" },
+
+    { "title": "ANSA",                   "site": "https://www.ansa.it",               "feed": "https://www.ansa.it/sito/ansait_rss.xml",             "category": "News IT" },
+    { "title": "la Repubblica",          "site": "https://www.repubblica.it",         "feed": "https://www.repubblica.it/rss/homepage/rss2.0.xml",   "category": "News IT" },
+    { "title": "Corriere della Sera",    "site": "https://www.corriere.it",           "feed": "https://www.corriere.it/rss/homepage.xml",            "category": "News IT" },
+    { "title": "Open",                   "site": "https://www.open.online",           "feed": "https://www.open.online/feed/",                       "category": "News IT" },
 
     { "title": "GitHub Blog",            "site": "https://github.blog",               "feed": "https://github.blog/feed/",                           "category": "Dev" },
     { "title": "Stack Overflow Blog",    "site": "https://stackoverflow.blog",        "feed": "https://stackoverflow.blog/feed/",                    "category": "Dev" },
@@ -27,6 +45,13 @@
     { "title": "Scientific American",    "site": "https://www.scientificamerican.com","feed": "https://www.scientificamerican.com/platform/syndication/rss/", "category": "Science" },
     { "title": "NASA Breaking News",     "site": "https://www.nasa.gov",              "feed": "https://www.nasa.gov/feed/",                          "category": "Science" },
     { "title": "Quanta Magazine",        "site": "https://www.quantamagazine.org",    "feed": "https://www.quantamagazine.org/feed/",                "category": "Science" },
+    { "title": "Phys.org",               "site": "https://phys.org",                  "feed": "https://phys.org/rss-feed/",                          "category": "Science" },
+    { "title": "ScienceDaily",           "site": "https://www.sciencedaily.com",      "feed": "https://www.sciencedaily.com/rss/all.xml",            "category": "Science" },
+
+    { "title": "IGN",                    "site": "https://www.ign.com",               "feed": "https://feeds.ign.com/ign/all",                       "category": "Gaming" },
+    { "title": "Eurogamer",              "site": "https://www.eurogamer.net",         "feed": "https://www.eurogamer.net/feed",                      "category": "Gaming" },
+    { "title": "Multiplayer.it",         "site": "https://multiplayer.it",            "feed": "https://multiplayer.it/feed/rss/homepage/",           "category": "Gaming" },
+    { "title": "SpazioGames",            "site": "https://www.spaziogames.it",        "feed": "https://www.spaziogames.it/feed",                     "category": "Gaming" },
 
     { "title": "xkcd",                   "site": "https://xkcd.com",                  "feed": "https://xkcd.com/rss.xml",                            "category": "Fun" },
     { "title": "r/programming",          "site": "https://www.reddit.com/r/programming", "feed": "https://www.reddit.com/r/programming/.rss",        "category": "Fun" }

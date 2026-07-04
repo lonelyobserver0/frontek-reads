@@ -12,17 +12,23 @@ framework, no runtime dependencies.
 
 ## Features
 
-- **Discover** — search a curated catalog of well‑known feeds by name, category or
-  site, **or paste any site / feed URL**. If you paste a page instead of a feed, the
-  app auto‑discovers the feed (`<link rel="alternate">`, then common paths like
-  `/feed`, `/rss`, `/atom.xml`, …).
+- **Discover** — search the web for feeds by name or topic (results come from the
+  Feedly search API), **or paste any site / feed URL**. If you paste a page instead of
+  a feed, the app auto‑discovers the feed (`<link rel="alternate">`, feed‑looking
+  links, then common paths like `/feed`, `/rss`, `/atom.xml`, …). A built‑in catalog of
+  ~45 popular feeds is used for suggestions and as an offline fallback.
 - **Aggregated home** — the latest articles from every subscription, newest first,
-  with a per‑source filter.
+  with a per‑source filter and **thumbnail previews** pulled from the feed.
+- **Favorites & Read later** — heart or bookmark any article; it's saved in full so it
+  stays readable even after the feed cache expires. Two dedicated views list them.
 - **In‑site reader (hybrid)** — click an article to read it *inside the app* instead
   of leaving. It shows the feed's content immediately; if the feed only ships an
   excerpt, it tries to fetch and extract the **full article** (readability‑style)
   from the original page. `Ctrl/Cmd+click` a title still opens the original in a new
   tab, and there's always an "open original" link.
+- **Multilingual** — the whole UI is available in **English, Italian, Spanish and
+  French**, auto‑selected from your browser language and overridable in Settings.
+- **Adjustable text size** — scale the whole app (and the reader) from 80 % to 180 %.
 - **Clean content** — boilerplate is stripped: "continue reading" links, related /
   share boxes, newsletter widgets and affiliate/tracking links.
 - **XSS‑safe** — all feed and page HTML is run through an allow‑list sanitizer before
@@ -34,11 +40,12 @@ framework, no runtime dependencies.
 
 Everything runs in the browser. Data is kept under three `localStorage` keys:
 
-| Key             | Contents                                                   |
-| --------------- | ---------------------------------------------------------- |
-| `frss.subs`     | your subscriptions `[{ title, feed, site }]`               |
-| `frss.settings` | your settings (currently the CORS proxy template)          |
-| `frss.cache`    | a small article cache (≤ 20 items/feed, 15‑min TTL)        |
+| Key             | Contents                                                              |
+| --------------- | --------------------------------------------------------------------- |
+| `frss.subs`     | your subscriptions `[{ title, feed, site }]`                          |
+| `frss.settings` | CORS proxy template, language, text‑size scale                        |
+| `frss.cache`    | a small article cache (≤ 20 items/feed, 15‑min TTL)                   |
+| `frss.saved`    | favorites & read‑later articles, stored in full so they survive cache |
 
 ### The CORS proxy
 
@@ -72,6 +79,15 @@ You have two options:
 > Note: some sites (paywalls, anti‑bot protection) return `403` to any server‑side
 > fetch. For those the reader shows the cleaned feed excerpt plus an "open original"
 > link — full extraction isn't possible without a real browser.
+
+### Feed search & privacy
+
+Discover's search box queries the **Feedly search API** to find feeds across the web
+(the request is routed through the same CORS proxy). This is the only case where
+something you type leaves the app: **your search terms are sent to Feedly.** Everything
+else — subscriptions, favorites, reading — stays in your browser. The in‑app search box
+says so explicitly. If the search fails or returns nothing, the app falls back to the
+built‑in catalog.
 
 ## Project layout
 

@@ -227,6 +227,59 @@ a:hover { text-decoration: underline; }
 .footer a { color: var(--gold); }
 .footer__meta { text-align: right; }
 
+/* ---------- UPPERCASE BRAND ---------- */
+.nav__brand { text-transform: uppercase; letter-spacing: .04em; }
+
+/* ---------- ARTICLE CARD: THUMBNAIL + ACTIONS ---------- */
+.article__row { display: flex; gap: 16px; align-items: flex-start; }
+.article__thumb {
+  flex: 0 0 84px; width: 84px; height: 84px; border-radius: 12px;
+  object-fit: cover; background: var(--cream); border: 1px solid var(--line);
+}
+.article__main { flex: 1 1 auto; min-width: 0; }
+.article__foot { margin-top: 16px; display: flex; gap: 16px; align-items: center; }
+.article__acts { margin-left: auto; display: flex; gap: 6px; }
+
+/* fav / read-later toggle buttons */
+.toggle {
+  display: inline-grid; place-items: center;
+  width: 34px; height: 34px; border-radius: 9px;
+  background: var(--cream); border: 1px solid var(--line);
+  font-size: 1.05rem; line-height: 1; cursor: pointer; color: var(--grey);
+  transition: transform .12s ease, background .12s ease, color .12s ease;
+}
+.toggle:hover { transform: translateY(-1px); background: #fff; }
+.toggle--fav.is-on { color: var(--coral); border-color: rgba(231,111,81,.4); background: rgba(231,111,81,.08); }
+.toggle--rl        { filter: grayscale(1); opacity: .55; }
+.toggle--rl.is-on  { filter: none; opacity: 1; border-color: rgba(42,157,143,.45); background: rgba(42,157,143,.08); }
+
+/* toggles inside the reader header (dark-agnostic, on white) */
+.reader__headtools { display: flex; align-items: center; gap: 8px; }
+
+/* ---------- SETTINGS: FONT CONTROL + SELECT ---------- */
+.fontctrl { display: flex; align-items: center; gap: 12px; margin: 4px 0 4px; }
+.fontctrl__val { font-weight: 800; color: var(--dark); min-width: 56px; text-align: center; }
+.fontctrl .iconbtn { font-size: 1.3rem; }
+.field__select {
+  width: 100%; padding: 11px 14px; border: 1px solid var(--line); border-radius: 10px;
+  font-size: .95rem; font-family: var(--font); color: var(--ink); background: #fff; cursor: pointer;
+}
+.field__select:focus { outline: 2px solid var(--teal); }
+
+/* ---------- DISCOVER: PRIVACY NOTE + LIGHT BUTTON ---------- */
+.search__note { color: #cfe0e2; font-size: .8rem; margin-top: 10px; opacity: .9; }
+.btn--light { color: #fff; border: 1.5px solid rgba(255,255,255,.45); background: rgba(255,255,255,.06); }
+.btn--light:hover { background: rgba(255,255,255,.16); border-color: #fff; }
+
+/* feed source icon in discover result cards */
+.fcard__head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.fcard__icon { width: 34px; height: 34px; border-radius: 8px; object-fit: cover; background: var(--cream); border: 1px solid var(--line); flex: 0 0 34px; }
+.fcard__head .fcard__cat { margin-bottom: 0; }
+.fcard__desc { color: var(--grey); font-size: .86rem; margin-bottom: 14px; flex: 1; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+
+/* subscriptions tools sit on the dark feed header now */
+#view-subs .subs__tools { display: flex; gap: 10px; flex-wrap: wrap; }
+
 /* ---------- RESPONSIVE ---------- */
 @media (max-width: 860px) {
   .nav__links { position: absolute; top: 64px; left: 0; right: 0; background: #fff; border-bottom: 1px solid var(--line); flex-direction: column; gap: 0; padding: 8px 0; display: none; }
