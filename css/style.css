@@ -256,6 +256,22 @@ a:hover { text-decoration: underline; }
 /* toggles inside the reader header (dark-agnostic, on white) */
 .reader__headtools { display: flex; align-items: center; gap: 8px; }
 
+/* ---------- READ / UNREAD ---------- */
+/* an already-opened article reads as "done": muted title & desc, faded thumb,
+   a small teal "read" badge. Controls stay full-strength so they're usable. */
+.article__read {
+  display: inline-flex; align-items: center; gap: 3px;
+  color: var(--teal); font-weight: 800; font-size: .68rem;
+  text-transform: uppercase; letter-spacing: .07em;
+}
+.article__read::before { content: "✓"; font-size: .82em; }
+.article.is-read { border-color: #eef1e9; box-shadow: none; background: #fcfcfa; }
+.article.is-read .article__title a { color: var(--grey); font-weight: 700; }
+.article.is-read .article__title a:hover { color: var(--teal); }
+.article.is-read .article__desc { color: #97a3a9; }
+.article.is-read .article__thumb { filter: grayscale(.5); opacity: .72; }
+.article.is-read .article__dot { background: var(--grey); }
+
 /* ---------- SETTINGS: FONT CONTROL + SELECT ---------- */
 .fontctrl { display: flex; align-items: center; gap: 12px; margin: 4px 0 4px; }
 .fontctrl__val { font-weight: 800; color: var(--dark); min-width: 56px; text-align: center; }

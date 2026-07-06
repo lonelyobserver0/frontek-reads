@@ -13,8 +13,10 @@
     subs:     'frss.subs',      // [{title, feed, site}]
     settings: 'frss.settings',  // {proxy, lang, fontScale}
     cache:    'frss.cache',     // { feedUrl: {t:ms, items:[...]} }
-    saved:    'frss.saved'      // [{...article, favorite, readLater, savedAt}]
+    saved:    'frss.saved',     // [{...article, favorite, readLater, savedAt}]
+    read:     'frss.read'       // [key, …] articles already opened (capped)
   };
+  var READ_CAP = 3000;          // cap remembered "read" keys to keep storage small
   var DEFAULT_PROXY = '/proxy?url={url}';
   var FALLBACK_PROXIES = [
     'https://api.allorigins.win/raw?url={url}',
@@ -65,7 +67,7 @@
       filter_all:'All',
       subscriptions_count: function (n) { return n + ' subscription' + (n === 1 ? '' : 's'); },
       articles_count:      function (n) { return n + ' article' + (n === 1 ? '' : 's'); },
-      card_read_here:'Read here →',
+      card_read_here:'Read here →', read_badge:'read',
       fav_add:'Add to favorites', fav_remove:'Remove from favorites',
       read_later_add:'Save to read later', read_later_remove:'Remove from read later',
       saved_favorites_title:'Favorites', saved_read_later_title:'Read later',
@@ -127,7 +129,7 @@
       filter_all:'Tutti',
       subscriptions_count: function (n) { return n + (n === 1 ? ' iscrizione' : ' iscrizioni'); },
       articles_count:      function (n) { return n + (n === 1 ? ' articolo' : ' articoli'); },
-      card_read_here:'Leggi qui →',
+      card_read_here:'Leggi qui →', read_badge:'letto',
       fav_add:'Aggiungi ai preferiti', fav_remove:'Rimuovi dai preferiti',
       read_later_add:'Salva per dopo', read_later_remove:'Togli da leggi più tardi',
       saved_favorites_title:'Preferiti', saved_read_later_title:'Leggi più tardi',
@@ -189,7 +191,7 @@
       filter_all:'Todos',
       subscriptions_count: function (n) { return n + (n === 1 ? ' suscripción' : ' suscripciones'); },
       articles_count:      function (n) { return n + (n === 1 ? ' artículo' : ' artículos'); },
-      card_read_here:'Leer aquí →',
+      card_read_here:'Leer aquí →', read_badge:'leído',
       fav_add:'Añadir a favoritos', fav_remove:'Quitar de favoritos',
       read_later_add:'Guardar para después', read_later_remove:'Quitar de leer después',
       saved_favorites_title:'Favoritos', saved_read_later_title:'Leer después',
@@ -251,7 +253,7 @@
       filter_all:'Tous',
       subscriptions_count: function (n) { return n + (n === 1 ? ' abonnement' : ' abonnements'); },
       articles_count:      function (n) { return n + (n === 1 ? ' article' : ' articles'); },
-      card_read_here:'Lire ici →',
+      card_read_here:'Lire ici →', read_badge:'lu',
       fav_add:'Ajouter aux favoris', fav_remove:'Retirer des favoris',
       read_later_add:'Enregistrer pour plus tard', read_later_remove:'Retirer de à lire plus tard',
       saved_favorites_title:'Favoris', saved_read_later_title:'À lire plus tard',
@@ -346,6 +348,9 @@
   if (!settings.fontScale) settings.fontScale = 100;
   var cache = load(LS.cache, {});
   var saved = load(LS.saved, []);
+  var readList = load(LS.read, []);            // oldest first
+  var readSet = Object.create(null);
+  readList.forEach(function (k) { if (k) readSet[k] = 1; });
   var catalog = [];
   var activeSource = null;
   var currentView = 'home';
@@ -598,6 +603,19 @@
   }
   function refreshSavedViews() { renderFavorites(); renderReadLater(); }
 
+  // ---------- read / unread ----------
+  function isRead(it) { var k = keyOf(it); return !!(k && readSet[k]); }
+  function markRead(it) {
+    var k = keyOf(it);
+    if (!k || readSet[k]) return false;
+    readSet[k] = 1; readList.push(k);
+    while (readList.length > READ_CAP) { var old = readList.shift(); if (old && old !== k) delete readSet[old]; }
+    save(LS.read, readList);
+    return true;
+  }
+  function refreshArticleLists() { renderHome(); renderFavorites(); renderReadLater(); }
+  function markReadAndRefresh(it) { if (markRead(it)) refreshArticleLists(); }
+
   // ---------- refresh / home ----------
   var homeItems = [];
 
@@ -804,6 +822,7 @@
 
   function openReader(item) {
     readerItem = item;
+    markReadAndRefresh(item);
     $('#readerSource').textContent = item.source || '';
     $('#readerDate').textContent = item.date ? fmtDate(item.date) : '';
     var ttl = $('#readerTitle');
@@ -871,6 +890,7 @@
 
   function articleCard(it) {
     var card = el('article', 'article');
+    if (isRead(it)) card.classList.add('is-read');
     var row = el('div', 'article__row');
     if (it.image) {
       var img = el('img', 'article__thumb'); img.src = it.image; img.alt = ''; img.loading = 'lazy';
@@ -884,22 +904,24 @@
     src.appendChild(document.createTextNode(it.source || ''));
     meta.appendChild(src);
     if (it.date) meta.appendChild(el('span', 'article__date', fmtDate(it.date)));
+    if (isRead(it)) meta.appendChild(el('span', 'article__read', t('read_badge')));
     main.appendChild(meta);
 
     var h = el('h3', 'article__title');
     var a = el('a', null, it.title);
     a.href = it.link || '#';
-    a.addEventListener('click', function (e) { if (e.ctrlKey || e.metaKey || e.shiftKey || e.button === 1) return; e.preventDefault(); openReader(it); });
+    a.addEventListener('click', function (e) { if (e.ctrlKey || e.metaKey || e.shiftKey || e.button === 1) { markReadAndRefresh(it); return; } e.preventDefault(); openReader(it); });
     h.appendChild(a); main.appendChild(h);
     if (it.summary) main.appendChild(el('p', 'article__desc', it.summary));
     row.appendChild(main); card.appendChild(row);
 
     var foot = el('div', 'article__foot');
     var read = el('a', 'article__link', t('card_read_here')); read.href = it.link || '#';
-    read.addEventListener('click', function (e) { if (e.ctrlKey || e.metaKey || e.shiftKey || e.button === 1) return; e.preventDefault(); openReader(it); });
+    read.addEventListener('click', function (e) { if (e.ctrlKey || e.metaKey || e.shiftKey || e.button === 1) { markReadAndRefresh(it); return; } e.preventDefault(); openReader(it); });
     foot.appendChild(read);
     var orig = el('a', 'article__link article__link--muted', t('reader_open_original'));
     orig.href = it.link || '#'; orig.target = '_blank'; orig.rel = 'noopener';
+    orig.addEventListener('click', function () { markReadAndRefresh(it); });
     foot.appendChild(orig);
     var acts = el('div', 'article__acts');
     acts.appendChild(makeToggle('fav', it, refreshSavedViews));
@@ -1200,6 +1222,20 @@
   }
   function routeFromHash() { showView((location.hash || '').replace('#', '') || 'home'); }
 
+  // Deep-link da altri siti frontek (es. start.frontek.dev):
+  //   ?read=<url articolo>&t=<titolo>&s=<fonte>
+  // Apre subito quell'articolo nel reader (il full-text lo scarica openReader).
+  function openFromQuery() {
+    try {
+      var p = new URLSearchParams(location.search);
+      var link = p.get('read'); if (!link) return;
+      var item = { title: p.get('t') || link, link: link, source: p.get('s') || '', content: '', summary: '' };
+      // pulisci la query dall'URL: la barra resta pulita e un refresh non riapre
+      try { history.replaceState(null, '', location.pathname + location.hash); } catch (e) {}
+      openReader(item);
+    } catch (e) {}
+  }
+
   // ---------- settings ----------
   function openSettings() {
     $('#proxyInput').value = settings.proxy;
@@ -1263,8 +1299,8 @@
     $('#btnClearCache').onclick = function () { cache = {}; save(LS.cache, cache); toast(t('toast_cache_cleared')); refreshAll(true); };
     $('#btnClearAll').onclick = function () {
       if (!confirm(t('confirm_delete_body'))) return;
-      [LS.subs, LS.cache, LS.settings, LS.saved].forEach(function (k) { localStorage.removeItem(k); });
-      subs = []; cache = {}; saved = []; settings = { proxy: DEFAULT_PROXY, fontScale: 100 };
+      [LS.subs, LS.cache, LS.settings, LS.saved, LS.read].forEach(function (k) { localStorage.removeItem(k); });
+      subs = []; cache = {}; saved = []; readList = []; readSet = Object.create(null); settings = { proxy: DEFAULT_PROXY, fontScale: 100 };
       applyFontScale();
       renderSubs(); renderSourceFilters(); homeItems = []; renderHome(); refreshSavedViews();
       closeSettings(); toast(t('toast_all_deleted'));
@@ -1286,6 +1322,7 @@
     applyFontScale();
     applyI18n();      // static strings + initial dynamic render
     routeFromHash();
+    openFromQuery();  // eventuale deep-link ?read=... (da start.frontek.dev)
 
     fetch('assets/catalog.json').then(function (r) { return r.json(); }).then(function (data) {
       catalog = (data && data.feeds) || [];

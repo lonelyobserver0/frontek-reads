@@ -1,0 +1,32 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>frontek reads — bridge</title>
+<!--
+  Bridge cross-origin: caricato in un iframe nascosto da start.frontek.dev.
+  Legge le sottoscrizioni (frss.subs) dal localStorage di feeds.frontek.dev
+  e le invia SOLO all'origin di start via postMessage. Nessun dato esce da
+  frontek.dev. Non fa nulla se aperto direttamente.
+-->
+<script>
+(function () {
+  'use strict';
+  var ALLOWED = 'https://start.frontek.dev';
+  function subs() {
+    try { return JSON.parse(localStorage.getItem('frss.subs') || '[]') || []; }
+    catch (e) { return []; }
+  }
+  function send() {
+    var list = subs().map(function (s) {
+      return { title: s.title || '', feed: s.feed || '', site: s.site || '' };
+    }).filter(function (s) { return s.feed; });
+    try { parent.postMessage({ type: 'frss.subs', subs: list }, ALLOWED); } catch (e) {}
+  }
+  // invia all'avvio…
+  send();
+  // …e su richiesta esplicita del parent (solo se è start)
+  window.addEventListener('message', function (ev) {
+    if (ev.origin === ALLOWED && ev.data && ev.data.type === 'frss.subs.request') send();
+  });
+})();
+</script>
+<p>frontek reads bridge</p>
