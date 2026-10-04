@@ -22,6 +22,7 @@
     'https://api.allorigins.win/raw?url={url}',
     'https://api.codetabs.com/v1/proxy/?quest={url}'
   ];
+  var PROXY_TIMEOUT = 8000;         // per attempt: a hung public proxy must not stall the chain
   var CACHE_TTL = 15 * 60 * 1000;   // 15 min
   var MAX_ITEMS_PER_FEED = 20;
   var CONTENT_CAP = 12000;
@@ -368,10 +369,12 @@
     function attempt() {
       if (i >= proxies.length) return Promise.reject(new Error('All proxies failed'));
       var target = proxied(url, proxies[i]); i++;
-      return fetch(target, { redirect: 'follow' })
+      var ac = new AbortController();
+      var timer = setTimeout(function () { ac.abort(); }, PROXY_TIMEOUT);
+      return fetch(target, { redirect: 'follow', signal: ac.signal })
         .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
-        .then(function (txt) { if (!txt || txt.length < 20) throw new Error('Empty response'); return txt; })
-        .catch(function () { return attempt(); });
+        .then(function (txt) { clearTimeout(timer); if (!txt || txt.length < 20) throw new Error('Empty response'); return txt; })
+        .catch(function () { clearTimeout(timer); return attempt(); });
     }
     return attempt();
   }
@@ -729,7 +732,10 @@
   // ---------- content cleaning ----------
   var CONTINUE_RE = /(continua a leggere|clicca qui per continuare|leggi (tutto|l['’]articolo|anche|di più)|continua »|read more|continue reading|\[…\]|\[\.\.\.\])/i;
   var JUNK_RE = /(share|social|related|correlat|leggi[-_]?anche|newsletter|subscribe|comment|commenti|advert|(^|[-_ ])adv?([-_ ]|$)|banner|promo|sponsor|widget|sidebar|author[-_]?box|post[-_]?tags|tag[-_]?list|breadcrumb|clickgo|outbrain|taboola|jp-relatedposts|wp-block-buttons)/i;
-  var JUNK_HREF_RE = /(\/clickgo\/|outbrain|taboola|doubleclick|googlesyndication|adservice|amzn\.to|\/aff[\/_-]|utm_medium=affiliate)/i;
+  var JUNK_HREF_RE = /(\/clickgo\/|outbrain|taboola|doubleclick|googlesyndication|adservice|amzn\.to|\/aff[\/_-]|utm_medium=affiliate|google\.[a-z.]+\/preferences\/source)/i;
+  // Short trailing lines that aren't article text ("Fonte dell'articolo: www.engadget.com").
+  // Kept out of CONTINUE_RE, which also decides whether a feed item is truncated.
+  var BOILERPLATE_RE = /^(fonte dell['’]articolo|article source)\s*:/i;
 
   function stripJunk(root) {
     // A node holding most of the text is the article itself, whatever its class
@@ -750,7 +756,7 @@
     Array.prototype.slice.call(root.querySelectorAll('a, h1, h2, h3, h4, strong, p')).forEach(function (n) {
       if (!n.parentNode) return;
       var tx = (n.textContent || '').trim();
-      if (tx && tx.length < 70 && CONTINUE_RE.test(tx)) { (n.closest('h1,h2,h3,h4,p,li,div') || n).remove(); }
+      if (tx && tx.length < 70 && (CONTINUE_RE.test(tx) || BOILERPLATE_RE.test(tx))) { (n.closest('h1,h2,h3,h4,p,li,div') || n).remove(); }
     });
     return root;
   }
@@ -799,6 +805,14 @@
     }
     if (!container) container = doc.body;
     stripJunk(container);
+    // Headings left orphaned at the end once their widget is gone ("Altre offerte consigliate").
+    var heads = container.querySelectorAll('h1,h2,h3,h4,h5,h6');
+    for (var h = heads.length - 1; h >= 0; h--) {
+      var after = doc.createRange();
+      after.setStartAfter(heads[h]); after.setEnd(container, container.childNodes.length);
+      if (after.toString().trim()) break;
+      heads[h].remove();
+    }
     return { html: container.innerHTML, chars: (container.textContent || '').trim().length };
   }
 
