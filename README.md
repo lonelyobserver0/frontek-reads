@@ -1,4 +1,4 @@
-# frontek reads
+# Frontek Reads
 
 A minimal, **client‑side RSS/Atom reader**. Search and subscribe to the sites you
 like, and read their latest articles in one aggregated feed — right inside the app.

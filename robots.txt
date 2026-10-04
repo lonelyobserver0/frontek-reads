@@ -1,4 +1,4 @@
-# robots.txt — frontek reads (RSS reader)
+# robots.txt — Frontek Reads (RSS reader)
 User-agent: *
 Allow: /
 

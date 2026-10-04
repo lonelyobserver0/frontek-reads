@@ -1,5 +1,5 @@
 /* =========================================================
-   frontek reads — client-side RSS/Atom aggregator
+   Frontek Reads — client-side RSS/Atom aggregator
    No backend, no accounts: subscriptions, favorites, settings
    and a small article cache all live in localStorage. Feeds
    (and feed search) are fetched through a configurable CORS
@@ -732,10 +732,16 @@
   var JUNK_HREF_RE = /(\/clickgo\/|outbrain|taboola|doubleclick|googlesyndication|adservice|amzn\.to|\/aff[\/_-]|utm_medium=affiliate)/i;
 
   function stripJunk(root) {
+    // A node holding most of the text is the article itself, whatever its class
+    // says (e.g. tomshw.it wraps the body in "adv__parsed__content"): keep it and
+    // let the loop strip the real junk nested inside.
+    var rootLen = (root.textContent || '').trim().length;
     Array.prototype.slice.call(root.querySelectorAll('[class],[id]')).forEach(function (n) {
       if (!n.parentNode) return;
       var key = (n.getAttribute('class') || '') + ' ' + (n.getAttribute('id') || '');
-      if (JUNK_RE.test(key)) n.remove();
+      if (!JUNK_RE.test(key)) return;
+      if (rootLen > 400 && (n.textContent || '').trim().length > rootLen * 0.5) return;
+      n.remove();
     });
     Array.prototype.slice.call(root.querySelectorAll('a[href]')).forEach(function (n) {
       if (!n.parentNode) return;
@@ -1152,7 +1158,7 @@
   function exportOpml() {
     if (!subs.length) { toast(t('toast_nothing_export')); return; }
     var lines = ['<?xml version="1.0" encoding="UTF-8"?>', '<opml version="2.0">',
-      '  <head><title>frontek reads subscriptions</title></head>', '  <body>'];
+      '  <head><title>Frontek Reads subscriptions</title></head>', '  <body>'];
     subs.forEach(function (s) {
       lines.push('    <outline type="rss" text="' + esc(s.title) + '" title="' + esc(s.title) +
         '" xmlUrl="' + esc(s.feed) + '" htmlUrl="' + esc(s.site || '') + '"/>');
