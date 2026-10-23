@@ -48,6 +48,7 @@ a:hover { text-decoration: underline; }
 }
 .nav__inner { display: flex; align-items: center; gap: 18px; height: 64px; }
 .nav__brand { font-weight: 800; font-size: 1.25rem; color: var(--dark); letter-spacing: -.02em; margin-right: auto; }
+.brand-mark { width: 40px; height: 40px; margin: -6px 12px -4px 0; vertical-align: middle; }
 .nav__brand span { color: var(--teal); }
 .nav__links { display: flex; gap: 22px; }
 .nav__links a { color: var(--grey); font-weight: 600; font-size: .92rem; }
